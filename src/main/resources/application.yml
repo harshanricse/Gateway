@@ -1,0 +1,32 @@
+server:
+  port: 1111
+spring:
+  application:
+    name: GatewayMS
+  cloud:
+    consul:
+      host: localhost
+    gateway:
+      discovery:
+        locator:
+          enabled: true # telling spring that we are also using DiscoveryClient
+      routes:
+        - id: infytel-calldetails # spring application name of call details microservice
+          uri: lb://infytel-calldetails # lb = load balancer
+          predicates: # to specify the path of URI
+            - Path=/customers/*/calldetails # /customers/{phoneNo}/calldetails
+        - id: infytel-friend-family
+          uri: lb://infytel-friend-family
+          predicates:
+            - Path=/customers
+        - id: infytel-customer
+          uri: lb://infytel-customer
+          predicates:
+            - Path=/infy/harsha/**
+          filters:
+            - StripPrefix=2
+            - PrefixPath=/customers #localhost:1111/infy/harsha/customers/1
+        - id: infytel-plan
+          uri: lb://infytel-plan
+          predicates:
+            - Path=/plans/**
